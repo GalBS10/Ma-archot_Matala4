@@ -13,7 +13,7 @@ typedef struct GRAPH_NODE_ {
     int node_num;
     pedge edges;
     struct GRAPH_NODE_ *next;
-    int seq;
+    int new_numbering;
 } node, *pnode;
 
 void build_graph_cmd(pnode *head);
@@ -23,5 +23,6 @@ void printGraph_cmd(pnode head); //for self debug
 void deleteGraph_cmd(pnode* head);
 void shortsPath_cmd(pnode head);
 void TSP_cmd(pnode head);
+void dijkstra_algop(int *arr,pnode here);
 
 #endif
