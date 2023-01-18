@@ -30,18 +30,19 @@ pnode search_node( pnode Node,int value){
 
 void dijkstra_algo(int *arr,pnode from){
     ppq Pqueue = (priority_queue*)malloc(sizeof(priority_queue));
+    if(!Pqueue){return ;}
 	Pqueue->node = from;
 	Pqueue->priority = 0;//lowest priority
 	Pqueue->next = NULL;
     while (Pqueue!=NULL){
         from = pop(&Pqueue);
-        pedge curr_edge = from->edges;
-        while(curr_edge!=NULL){
-            if (arr[from->new_numbering] + curr_edge->weight < arr[curr_edge->endpoint->new_numbering]){
-                arr[curr_edge->endpoint->new_numbering] = arr[from->new_numbering] + curr_edge->weight;
-                push(&Pqueue,curr_edge->endpoint,arr[curr_edge->endpoint->new_numbering]);
+        pedge this = from->edges;
+        while(this!=NULL){
+            if (arr[from->new_numbering] + this->weight < arr[this->endpoint->new_numbering]){
+                arr[this->endpoint->new_numbering] = arr[from->new_numbering] + this->weight;
+                push(&Pqueue,this->endpoint,arr[this->endpoint->new_numbering]);
             }
-            curr_edge= curr_edge->next;
+            this= this->next;
         }
     }
 }
@@ -76,6 +77,7 @@ void build_graph_cmd(pnode *head){
         int weight;
         scanf("%d", &weight);
         pedge tmp_node = (pedge)malloc(sizeof(edge));
+        if(!tmp_node){return ;}
         tmp_node->weight = weight;//initializing the node
         tmp_node->endpoint = dest;
         tmp_node->next = prev;
@@ -93,6 +95,7 @@ void insert_node_cmd(pnode *head){
     pnode add_node = search_node(*head, what_node);
     if (*head == NULL){//checking if the head is not already exist.
         pnode node_t = (pnode)malloc(sizeof(node));
+        if(!node_t){return ;}
         node_t->edges = NULL;
         node_t->node_num = what_node;
         node_t->next = NULL;
@@ -108,6 +111,7 @@ void insert_node_cmd(pnode *head){
         {
             if((*temp)->node_num< what_node && (*temp)->next->node_num> what_node){//we want to add the node in the right place.
                 pnode temp2 = (pnode) malloc(sizeof(node));
+                if(!temp2){return ;}
                 temp2->edges = NULL;
                 temp2->next=(*temp)->next;//initializing the node.
                 temp2->node_num = what_node;
@@ -117,6 +121,7 @@ void insert_node_cmd(pnode *head){
             temp=&((*temp)->next);
         }
         pnode ans = (pnode) malloc(sizeof(node));//if the node->node_num doesn't fit we will add him to the end of the list.
+        if(!ans){return ;}
         ans->edges = NULL;
         ans->next = (*temp)->next;
         ans->node_num = what_node;//initializing the node.
@@ -129,6 +134,7 @@ void insert_node_cmd(pnode *head){
     while(scanf("%d", &where_to)==1){//while we are getting int (this is what will make the function stop when we will get a 'n' etc.)
         pnode dest = search_node(*head,where_to);//the node we strech an edge to
         pedge tmp_node = (pedge)malloc(sizeof(edge));
+        if(!tmp_node){return ;}
         scanf("%d", &weight);//the weight
         tmp_node->weight = weight;
         tmp_node->endpoint = dest;
@@ -169,6 +175,75 @@ void deleteGraph_cmd(pnode* head){
         free(node);
     }
 }
+
+/// @brief - Finding the shortest path from vertex a to b and then printing the weight of the path
+/// @param head - The head of the vertex linkedlist.
+void shortsPath_cmd(pnode head){
+    int from;
+    int where_to;
+    scanf("%d", &from);//getting the vertex that we want to streach an edge from.
+    scanf("%d", &where_to);//getting the vertex that we want to streach an edge to.
+    pnode node_from;
+    int numbering_where_to;
+    node_from = search_node(head,from);
+    numbering_where_to = search_node(head,where_to)->new_numbering;
+    int j= numbering(head);//tha size of the vertex linkedlist.
+    int *arr=(int*)malloc(sizeof(int)*j);//An array to keep the d[v] of each vertex by i = node->new_numbering.
+    if(!arr){return ;}
+    for (int i=0;i<j;i++){//by dijkstra algo first we need initialize d[v]=infinity to all of the vertexes.
+        arr[i] = infinity;
+    }
+    arr[node_from->new_numbering] = 0;
+    dijkstra_algo(arr, node_from);//Running the algorithm
+    if (arr[numbering_where_to]!=infinity){//if there is a path
+        printf("Dijsktra shortest path: %d \n", arr[numbering_where_to]);
+    }
+    else{
+        printf("Dijsktra shortest path: -1 \n");
+    }
+    free(arr);
+}
+
+
+int main(){
+    char s;
+    //int k;
+    pnode head = NULL;
+    int end_of_file = 0;
+    while(end_of_file!=EOF){
+        end_of_file = scanf("%c", &s);
+        if (s == 'A'){
+            int num_of_v =0;
+            scanf("%d",&num_of_v);
+            pnode head1 = (pnode) malloc(sizeof(node));
+            head1->node_num = 0;
+            head1->edges = NULL;
+            head1->next = NULL;
+            for(int i=1;i<num_of_v;i++){
+                pnode tmp = (pnode) malloc(sizeof(node));
+                tmp->node_num = i;
+                tmp->edges = NULL;
+                tmp->next = NULL;
+                add_node_V(head1,tmp);
+            }
+            head = head1;
+        }
+        if (s == 'n'){
+            build_graph_cmd(&head);
+        }
+    
+    return 0;
+    }
+}
+
+
+
+
+
+
+
+/*
+
 void printGraph_cmd(pnode head){
     while(head){
         printf("node id: %d\n", head->node_num);
@@ -181,30 +256,4 @@ void printGraph_cmd(pnode head){
     }
 }
 
-
-void shortsPath_cmd(pnode head){
-    int from;
-    int where_to;
-    scanf("%d", &from);
-    scanf("%d", &where_to);
-    pnode node_from;
-    int numbering_from;
-    int numbering_where_to;
-    node_from = search_node(head,from);
-    numbering_from = node_from->new_numbering;
-    numbering_where_to = search_node(head,where_to)->new_numbering;
-    int j= numbering(head);//tha size of the vertex linkedlist.
-    int *arr=(int*)malloc(sizeof(int)*j);//An array to keep the d[v] of each vertex by i = node->new_numbering.
-    for (int i=0;i<j;i++){//by dijkstra algo we first initialize d[v]=infinity to all of the vertexes.
-        arr[i] = infinity;
-    }
-    arr[numbering_from] = 0;
-    dijkstra_algo(arr, node_from);//Running the algorithm
-    if (arr[numbering_where_to]<infinity){//if there is a path
-        printf("Dijsktra shortest path: %d \n", arr[numbering_where_to]);
-    }
-    else{
-        printf("Dijsktra shortest path: -1 \n");
-    }
-    free(arr);
-}
+*/

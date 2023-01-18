@@ -7,3 +7,4 @@ typedef struct priority_queue {
 
 pnode pop(ppq* head);
 void push(ppq* head, pnode d, int p);
+
