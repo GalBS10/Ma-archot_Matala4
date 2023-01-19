@@ -33,6 +33,9 @@ void delete_edge(int value, pnode Node){
     }
 }
 
+/// @brief - numbering all the vertexes in the linkedlist.
+/// @param head - The head of the vertex list.
+/// @return - returning the amount of vertex in the linkedlist.
 int numbering (pnode head){
 	int i=0;
     pnode runner = head;

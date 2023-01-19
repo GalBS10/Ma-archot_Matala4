@@ -19,12 +19,11 @@ typedef struct GRAPH_NODE_ {
 void build_graph_cmd(pnode *head);
 void insert_node_cmd(pnode *head);
 void delete_node_cmd(pnode *head);
-void printGraph_cmd(pnode head); //for self debug
 void deleteGraph_cmd(pnode* head);
 void shortsPath_cmd(pnode head);
-void permutation(int* cities,int start,int end,int size_of_nodes, int* ans, pnode head);
+void TSP_code(int* Vertexs, int index0, int size_of_arr, int size_of_nodes, int* ans, pnode head);
 void TSP_cmd(pnode head);
-void dijkstra_algo(int *arr,pnode here);
-void swap(int* a, int* b);
+void dijkstra_algo(int *arr,pnode from);
+void change_order(int* j, int* index0);
 
 #endif

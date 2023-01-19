@@ -7,7 +7,7 @@
 #define infinity INT_MAX
 
 ////////side_functions//////////
-void add_node_V(pnode node, pnode add){
+void add_node_V(pnode node, pnode add){//Adding "node" to the end of the vertex list.
     pnode tmp1 = node;
     while(tmp1->next!=NULL){
         tmp1 = tmp1->next;
@@ -15,7 +15,7 @@ void add_node_V(pnode node, pnode add){
     tmp1->next = add;
 }
 
-pnode search_node( pnode Node,int value){
+pnode search_node( pnode Node,int value){//Runnig on the vertex list untill we find a node that have node->node_num = value.
     pnode runner = Node;
     while (runner!=NULL){
         if (runner->node_num == value){
@@ -28,7 +28,7 @@ pnode search_node( pnode Node,int value){
 
 
 
-void dijkstra_algo(int *arr,pnode from){
+void dijkstra_algo(int *arr,pnode from){//finding the shortest path from one edge to all of the others by using a priority queue.
     ppq Pqueue = (priority_queue*)malloc(sizeof(priority_queue));
     if(!Pqueue){return ;}
 	Pqueue->node = from;
@@ -38,9 +38,9 @@ void dijkstra_algo(int *arr,pnode from){
         from = pop(&Pqueue);
         pedge this = from->edges;
         while(this!=NULL){
-            if (arr[from->new_numbering] + this->weight < arr[this->endpoint->new_numbering]){
-                arr[this->endpoint->new_numbering] = arr[from->new_numbering] + this->weight;
-                push(&Pqueue,this->endpoint,arr[this->endpoint->new_numbering]);
+            if (arr[from->new_numbering] + this->weight < arr[this->endpoint->new_numbering]){//checking if the current distance from the source vertex->
+                arr[this->endpoint->new_numbering] = arr[from->new_numbering] + this->weight;//->to the current vertex plus the weight of the edge between them->
+                push(&Pqueue,this->endpoint,arr[this->endpoint->new_numbering]);//->is less than the previously computed distance to the endpoint vertex.
             }
             this= this->next;
         }
@@ -204,19 +204,21 @@ void shortsPath_cmd(pnode head){
     free(arr);
 }
 
+/// @brief - Covering function that solves the TSP problem by using a side function.
+/// @param head - The head of the vertex linkedlist.
 void TSP_cmd(pnode head){
     int size=0;
-    scanf("%d",&size);
+    scanf("%d",&size);//getting the amount of nodes the user gives.
     int ans = infinity;
-    int *Vertexs = (int*)malloc(sizeof(int)*size); 
-    if(!Vertexs){return ;}
-    for (int i=0;i<size;i++){
+    int *Vertexs = (int*)malloc(sizeof(int)*size);//clearing space for an array that aull save the verexes the user want to input.
+    if(!Vertexs){return;}
+    for (int i=0;i<size;i++){//initializing the array.
         scanf("%d", &Vertexs[i]);
     }
-    int size_of_nodes = numbering(head);
-    TSP_code(Vertexs,0,size-1,size_of_nodes,&ans,head);
+    int size_of_nodes = numbering(head);//The amount of vertexes in the linkedlist.
+    TSP_code(Vertexs,0,size-1,size_of_nodes,&ans,head);//calling the side function.
 
-    if (ans != INT_MAX){
+    if (ans != INT_MAX){//if there is path, the side function will change ans data to a number that is smaller.
         printf("TSP shortest path: %d \n", ans);
     }
     else{
@@ -225,45 +227,57 @@ void TSP_cmd(pnode head){
     free(Vertexs);
 }
 
-void TSP_code(int* Vertexs, int start, int size_of_arr, int size_of_nodes, int* ans, pnode head){
-    if (start == size_of_arr){
+/// @brief - A recursive function that finds in each call the smallest path that is going thorough all of the vertexes by using the Dijkstra algorithm.
+///          In each iteration we change the vertex we start with and calling Dijkstra on him. Then we compare the answer with "ans" and if its smaller
+///          we change ans to be the smallest path we got.
+/// @param Vertexs - The array that keeps the vertexes.
+/// @param index0 - index 0 of Vertex.
+/// @param size_of_arr -  The amount of vertexes the user gave.
+/// @param size_of_nodes - The amount of vertexes in the linkedlist.
+/// @param ans - an integer that indicate us if there is a path. We used a pointer in order to keep the changes insted of losing them after the function ends.
+/// @param head - The head of the vertex linkedlist.
+void TSP_code(int* Vertexs, int index0, int size_of_arr, int size_of_nodes, int* ans, pnode head){
+    if (index0 == size_of_arr){//checking if the current index of the "Vertexs" array has reached the end of the array. 
+    //It means that the function has finished iterating through all possible permutations of the nodes in the "Vertexs" array.
         int last_weight =0;
-        int *weights=(int*)malloc(sizeof(int)*size_of_nodes);
-        for (int i=0;i<size_of_nodes;i++){
+        int *weights=(int*)malloc(sizeof(int)*size_of_nodes);//stores the minimum weight of path from the current vertex to every other vertex in the graph.
+        for (int i=0;i<size_of_nodes;i++){//Initializing to MAX
             weights[i] =  INT_MAX;
         }
-        pnode vertex = search_node( head,Vertexs[0]);
-        weights[vertex->new_numbering] = 0;
+        pnode vertex = search_node( head,Vertexs[0]); 
+        weights[vertex->new_numbering] = 0;//setting the array data to 0 in the position of the vertex.
         for (int i=1;i<=size_of_arr;i++){
             dijkstra_algo(weights,vertex);
-            if (weights[search_node( head,Vertexs[i])->new_numbering] == INT_MAX){
+            if (weights[search_node( head,Vertexs[i])->new_numbering] == INT_MAX){//if there isn't a path.
                 free (weights);
                 return;
             }
+            weights[vertex->new_numbering] = INT_MAX;
             vertex = search_node( head,Vertexs[i]);
-            last_weight = last_weight + weights[vertex->new_numbering];
-            for (int j=0;j<size_of_nodes;j++){
-                weights[j] =  INT_MAX;
-            }
-            weights[vertex->new_numbering] = 0;
+            last_weight = last_weight + weights[vertex->new_numbering];//update the total weight of the path.
+            weights[vertex->new_numbering] = 0;//reset the weight of the edge from the current node to the next node. 
+            //this is done to avoid visiting the same edge twice and to avoid counting it multiple times in the total weight of the path.
         }
-        free (weights);
-        if (last_weight < *ans && last_weight !=0){
+        free (weights);//frees the dynamically allocated memory for the weights array before returning.
+        if (last_weight < *ans && last_weight !=0){//Updating ans if the answer from Dijksra is smaller. 
             *ans = last_weight;
         }
         return;
     }
-    for (int j=start;j<=size_of_arr;j++){
-        change_order(Vertexs + j, Vertexs + start);
-        TSP_code(Vertexs, start + 1, size_of_arr, size_of_nodes, ans, head);
-        change_order(Vertexs + j, Vertexs + start);
+    for (int j=index0;j<=size_of_arr;j++){//Gnerating all possible permutations by using "change_order".
+        change_order(Vertexs + j, Vertexs + index0);
+        TSP_code(Vertexs, index0 + 1, size_of_arr, size_of_nodes, ans, head);
+        change_order(Vertexs + j, Vertexs + index0);
     }
 }
 
-void change_order(int* j, int* start){
+/// @brief - Swaping between j and index0. in this function we use pointers in order to keep the changes insted of losing them after the function ends.
+/// @param j - The current index in "Vertexes".
+/// @param index0 - index 0 in "Vertex".
+void change_order(int* j, int* index0){
     int temp = *j;
-    *j = *start;
-    *start = temp;
+    *j = *index0;
+    *index0 = temp;
 }
 
 int main(){
