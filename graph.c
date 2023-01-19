@@ -293,6 +293,7 @@ int main(){
             TSP_cmd(head);
         }
     }
+    deleteGraph_cmd(&head);
     return 0;
 }
 
