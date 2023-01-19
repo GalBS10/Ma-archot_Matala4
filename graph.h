@@ -22,7 +22,9 @@ void delete_node_cmd(pnode *head);
 void printGraph_cmd(pnode head); //for self debug
 void deleteGraph_cmd(pnode* head);
 void shortsPath_cmd(pnode head);
+void permutation(int* cities,int start,int end,int size_of_nodes, int* ans, pnode head);
 void TSP_cmd(pnode head);
 void dijkstra_algo(int *arr,pnode here);
+void swap(int* a, int* b);
 
 #endif

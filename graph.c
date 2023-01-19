@@ -204,6 +204,55 @@ void shortsPath_cmd(pnode head){
     free(arr);
 }
 
+void TSP_cmd(pnode head){
+    // Initialize the starting point
+    int size_of_nodes = numbering(head);
+    int ans = 100000;
+    int cities[size_of_nodes];
+    for (int i=0;i<size_of_nodes;i++){
+        cities[i] = i;
+    }
+    permutation(cities,0,size_of_nodes-1,size_of_nodes,&ans,head);
+    printf("the shortest path is: %d\n",ans);
+}
+
+void permutation(int* cities,int start,int end,int size_of_nodes, int* ans, pnode head){
+    if (start == end){
+        int sum = 0;
+        for (int i=0;i<size_of_nodes-1;i++){
+            pnode temp = head;
+            while (temp!=NULL){
+                if (temp->new_numbering == cities[i]){
+                    pedge runner = temp->edges;
+                    while(runner!=NULL){
+                        if (runner->endpoint->new_numbering == cities[i+1]){
+                            sum += runner->weight;
+                            break;
+                        }
+                        runner = runner->next;
+                    }
+                }
+                temp = temp->next;
+            }
+        }
+        if (sum<*ans){
+            *ans = sum;
+        }
+    }
+    else {
+        for (int i=start;i<=end;i++){
+            swap(&cities[start],&cities[i]);
+            permutation(cities,start+1,end,size_of_nodes,ans,head);
+            swap(&cities[start],&cities[i]);
+        }
+    }
+}
+
+void swap(int* a, int* b){
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
 
 int main(){
     char s;
@@ -231,9 +280,20 @@ int main(){
         if (s == 'n'){
             build_graph_cmd(&head);
         }
-    
-    return 0;
+        if (s == 'B'){
+            insert_node_cmd(&head);
+        }
+        if (s=='D'){
+            delete_node_cmd(&head);
+        }
+        if (s=='S'){
+            shortsPath_cmd(head);
+        }
+        if (s=='T'){
+            TSP_cmd(head);
+        }
     }
+    return 0;
 }
 
 
