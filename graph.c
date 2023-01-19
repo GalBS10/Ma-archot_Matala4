@@ -205,60 +205,71 @@ void shortsPath_cmd(pnode head){
 }
 
 void TSP_cmd(pnode head){
-    // Initialize the starting point
+    int size=0;
+    scanf("%d",&size);
+    int ans = infinity;
+    int *Vertexs = (int*)malloc(sizeof(int)*size); 
+    if(!Vertexs){return ;}
+    for (int i=0;i<size;i++){
+        scanf("%d", &Vertexs[i]);
+    }
     int size_of_nodes = numbering(head);
-    int ans = 100000;
-    int cities[size_of_nodes];
-    for (int i=0;i<size_of_nodes;i++){
-        cities[i] = i;
+    TSP_code(Vertexs,0,size-1,size_of_nodes,&ans,head);
+
+    if (ans != INT_MAX){
+        printf("TSP shortest path: %d \n", ans);
     }
-    permutation(cities,0,size_of_nodes-1,size_of_nodes,&ans,head);
-    printf("the shortest path is: %d\n",ans);
+    else{
+        printf("TSP shortest path: -1 \n");
+    }
+    free(Vertexs);
 }
 
-void permutation(int* cities,int start,int end,int size_of_nodes, int* ans, pnode head){
-    if (start == end){
-        int sum = 0;
-        for (int i=0;i<size_of_nodes-1;i++){
-            pnode temp = head;
-            while (temp!=NULL){
-                if (temp->new_numbering == cities[i]){
-                    pedge runner = temp->edges;
-                    while(runner!=NULL){
-                        if (runner->endpoint->new_numbering == cities[i+1]){
-                            sum += runner->weight;
-                            break;
-                        }
-                        runner = runner->next;
-                    }
-                }
-                temp = temp->next;
+void TSP_code(int* Vertexs, int start, int size_of_arr, int size_of_nodes, int* ans, pnode head){
+    if (start == size_of_arr){
+        int last_weight =0;
+        int *weights=(int*)malloc(sizeof(int)*size_of_nodes);
+        for (int i=0;i<size_of_nodes;i++){
+            weights[i] =  INT_MAX;
+        }
+        pnode vertex = search_node( head,Vertexs[0]);
+        weights[vertex->new_numbering] = 0;
+        for (int i=1;i<=size_of_arr;i++){
+            dijkstra_algo(weights,vertex);
+            if (weights[search_node( head,Vertexs[i])->new_numbering] == INT_MAX){
+                free (weights);
+                return;
             }
+            vertex = search_node( head,Vertexs[i]);
+            last_weight = last_weight + weights[vertex->new_numbering];
+            for (int j=0;j<size_of_nodes;j++){
+                weights[j] =  INT_MAX;
+            }
+            weights[vertex->new_numbering] = 0;
         }
-        if (sum<*ans){
-            *ans = sum;
+        free (weights);
+        if (last_weight < *ans && last_weight !=0){
+            *ans = last_weight;
         }
+        return;
     }
-    else {
-        for (int i=start;i<=end;i++){
-            swap(&cities[start],&cities[i]);
-            permutation(cities,start+1,end,size_of_nodes,ans,head);
-            swap(&cities[start],&cities[i]);
-        }
+    for (int j=start;j<=size_of_arr;j++){
+        change_order(Vertexs + j, Vertexs + start);
+        TSP_code(Vertexs, start + 1, size_of_arr, size_of_nodes, ans, head);
+        change_order(Vertexs + j, Vertexs + start);
     }
 }
 
-void swap(int* a, int* b){
-    int temp = *a;
-    *a = *b;
-    *b = temp;
+void change_order(int* j, int* start){
+    int temp = *j;
+    *j = *start;
+    *start = temp;
 }
 
 int main(){
     char s;
-    //int k;
     pnode head = NULL;
-    int end_of_file = 0;
+    int end_of_file = 1;
     while(end_of_file!=EOF){
         end_of_file = scanf("%c", &s);
         if (s == 'A'){
@@ -277,44 +288,22 @@ int main(){
             }
             head = head1;
         }
-        if (s == 'n'){
+        else if (s == 'n'){
             build_graph_cmd(&head);
         }
-        if (s == 'B'){
+        else if (s == 'B'){
             insert_node_cmd(&head);
         }
-        if (s=='D'){
+        else if (s=='D'){
             delete_node_cmd(&head);
         }
-        if (s=='S'){
+        else if (s=='S'){
             shortsPath_cmd(head);
         }
-        if (s=='T'){
+        else if (s=='T'){
             TSP_cmd(head);
         }
     }
     deleteGraph_cmd(&head);
     return 0;
 }
-
-
-
-
-
-
-
-/*
-
-void printGraph_cmd(pnode head){
-    while(head){
-        printf("node id: %d\n", head->node_num);
-        pedge here = head->edges;
-        while(here){
-            printf("%d -> %d   w: %d\n", head->node_num, here->endpoint->node_num, here->weight);
-            here= here->next;
-        }
-        head = head->next;
-    }
-}
-
-*/
